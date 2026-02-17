@@ -61,6 +61,12 @@ func (m *GCPWorkloadIdentityMutator) Handle(ctx context.Context, ar admission.Re
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 
+	skipPod := pod.Annotations[filepath.Join(m.AnnotationDomain, SkipPodAnnotation)]
+
+	if (skipPod == "true") {
+		return admission.Allowed("")
+	}
+
 	idConfig, err := NewGCPWorkloadIdentityConfig(m.AnnotationDomain, sa)
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)

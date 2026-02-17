@@ -35,6 +35,12 @@ const (
 	//
 	// Annotations for Pod
 	//
+	// A boolean to skip the Pod from being processed by the mutator.
+	SkipPodAnnotation = "skip-pod"
+
+	//
+	// Annotations for Pod
+	//
 	// The External Credentials JSON blob to be injected into the cluster, only used in 'direct' mode.
 	ExternalCredentialsJsonAnnotation = "external-credentials-json"
 
