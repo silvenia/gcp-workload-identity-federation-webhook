@@ -42,12 +42,16 @@ func (m *GCPWorkloadIdentityMutator) mutatePod(pod *corev1.Pod, idConfig GCPWork
 		pod.Annotations = map[string]string{}
 	}
 	pod.Annotations[filepath.Join(m.AnnotationDomain, WorkloadIdentityProviderAnnotation)] = *idConfig.WorkloadIdentityProvider
-	pod.Annotations[filepath.Join(m.AnnotationDomain, ServiceAccountEmailAnnotation)] = *idConfig.ServiceAccountEmail
+	var email string = ""
+	if (idConfig.ServiceAccountEmail != nil) {
+		email = *idConfig.ServiceAccountEmail
+		pod.Annotations[filepath.Join(m.AnnotationDomain, ServiceAccountEmailAnnotation)] = *idConfig.ServiceAccountEmail
+	}
 	pod.Annotations[filepath.Join(m.AnnotationDomain, AudienceAnnotation)] = audience
 	pod.Annotations[filepath.Join(m.AnnotationDomain, TokenExpirationAnnotation)] = fmt.Sprint(expirationSeconds)
 	if idConfig.InjectionMode == DirectMode {
 		// Add annotation
-		credBody, err := buildExternalCredentialsJson(*idConfig.WorkloadIdentityProvider, *idConfig.ServiceAccountEmail)
+		credBody, err := buildExternalCredentialsJson(*idConfig.WorkloadIdentityProvider, email)
 		if err != nil {
 			return err
 		}
@@ -57,7 +61,7 @@ func (m *GCPWorkloadIdentityMutator) mutatePod(pod *corev1.Pod, idConfig GCPWork
 	//
 	// calculate project from service account
 	//
-	matches := projectRegex.FindStringSubmatch(*idConfig.ServiceAccountEmail)
+	matches := projectRegex.FindStringSubmatch(email)
 	project := ""
 	if len(matches) >= 2 {
 		project = matches[1] // the group 0 is thw whole match

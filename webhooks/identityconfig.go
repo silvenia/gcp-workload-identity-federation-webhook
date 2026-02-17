@@ -84,8 +84,12 @@ func NewGCPWorkloadIdentityConfig(
 		return nil, nil
 	}
 
-	if cfg.WorkloadIdentityProvider == nil || cfg.ServiceAccountEmail == nil {
-		return nil, fmt.Errorf("%s, %s must set at a time", filepath.Join(annotationDomain, WorkloadIdentityProviderAnnotation), filepath.Join(annotationDomain, TokenExpirationAnnotation))
+	if (cfg.ServiceAccountEmail == nil && cfg.InjectionMode == GCloudMode) {
+		return nil, fmt.Errorf("%s must be set when injection mode is '%s'", filepath.Join(annotationDomain, ServiceAccountEmailAnnotation), GCloudMode)
+	}
+
+	if cfg.WorkloadIdentityProvider == nil {
+		return nil, fmt.Errorf("%s must set at a time", filepath.Join(annotationDomain, WorkloadIdentityProviderAnnotation))
 	}
 
 	if !workloadIdentityProviderRegex.Match([]byte(*cfg.WorkloadIdentityProvider)) {
